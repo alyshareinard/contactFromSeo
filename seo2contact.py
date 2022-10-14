@@ -1319,44 +1319,60 @@ def process_seos(seolist):
     #seolist = pd.read_csv(listname + ".csv")
     #print(seolist)
 
-    output_file = "First Name" + ","+ "Job Title"+ ","+"BrandName"+ ","+"Company"+","+"Seoname"+","+"Email"+"\n"
+#    output_file = "First Name" + ","+ "Job Title"+ ","+"BrandName"+ ","+"Company"+","+"Seoname"+","+"Email"+"\n"
     seos = seolist
     print(seos)
     #print(len(seos), len(HScontacts))
     contactIDs = get_contacts_from_seolist(seos, HScontacts)
     #print(contactIDs)
+    fname = []
+    email=[]
+    jobtitle=[]
+    brandname=[]
+    company=[]
+    seo=[]
     for contactID in contactIDs:
         contact_record = get_contact_byID(str(contactID))
 
     #            print(contact_record['properties'])
         if 'firstname' in contact_record['properties']:
             contact_fname = contact_record['properties']['firstname']['value']
+            fname.append(contact_fname)
         else:
             contact_fname = "UNK"
+            fname.append(contact_fname)
         if 'lastname' in contact_record['properties']:  
             contact_lname = contact_record['properties']['lastname']['value']
         else:
             contact_lname = "UNK"
         if 'email' in contact_record['properties']: 
             contact_email = contact_record['properties']['email']['value']
+            email.append(contact_email)
         else:
             contact_email = "UNK"
+            email.append(contact_email)
         if 'jobtitle' in contact_record['properties']: 
             contact_jobtitle = contact_record['properties']['jobtitle']['value'].replace(",", " ")
+            jobtitle.append(contact_jobtitle)
         else:
             contact_jobtitle = "UNK"
+            jobtitle.append(contact_jobtitle)
         if 'brand_name' in contact_record['properties']: 
             contact_brandname = contact_record['properties']['brand_name']['value']
+            brandname.append(contact_brandname)
         else:
             contact_brandname = "UNK"
+            brandname.append(contact_brandname)
         if 'company' in contact_record['properties']: 
             contact_company = contact_record['properties']['company']['value']
+            company.append(contact_company)
         else:
             contact_company = "UNK"
-            
+            company.append(contact_company)
+        seo.append(contact_record['properties']['seoname']['value'])
 
 
-        output_file = output_file + contact_fname + ","+ contact_jobtitle+ ","+contact_brandname+ ","+contact_company+","+contact_record['properties']['seoname']['value']+","+contact_email+"\n"
+        output_file = pd.DataFrame(fname, jobtitle, brandname, company, seo, email)
     return(output_file)
     #output = pd.DateFrame
     #    print("\n")
