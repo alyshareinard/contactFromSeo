@@ -1321,7 +1321,7 @@ def process_seos(seolist):
 
 #    output_file = "First Name" + ","+ "Job Title"+ ","+"BrandName"+ ","+"Company"+","+"Seoname"+","+"Email"+"\n"
     seos = seolist
-    print(seos)
+
     #print(len(seos), len(HScontacts))
     contactIDs = get_contacts_from_seolist(seos, HScontacts)
     #print(contactIDs)
@@ -1371,8 +1371,8 @@ def process_seos(seolist):
             company.append(contact_company)
         seo.append(contact_record['properties']['seoname']['value'])
 
-
-    output_file = pd.DataFrame([fname, jobtitle, brandname, company, seo, email])
+    output = {"First name":fname, "Job title":jobtitle, "Brand name":brandname, "Company":company, "SEO Name":seo, "Email":email}
+    output_file = pd.DataFrame(output)#list(zip(fname, jobtitle, brandname, company, seo, email)))
     return(output_file)
     #output = pd.DateFrame
     #    print("\n")
@@ -1386,22 +1386,24 @@ st.title("Get contacts for SEO list")
 
 #st.write("Upload your bad URL file here")
 seolist = st.file_uploader("Upload your SEO list")
+if seolist is not None:
+    seolist = seolist.getvalue().decode('UTF-8')
 
-time_to_process = st.button("Ready to process")
-if time_to_process:
-    output_file = process_seos(seolist)
+    time_to_process = st.button("Ready to process")
+    if time_to_process:
+        output_file = process_seos(seolist)
 
-    if len(output_file)>0:
-        @st.cache
-        def convert_df(df):
-            # IMPORTANT: Cache the conversion to prevent computation on every rerun
-            return df.to_csv().encode('utf-8')
+        if len(output_file)>0:
+            @st.cache
+            def convert_df(df):
+                # IMPORTANT: Cache the conversion to prevent computation on every rerun
+                return df.to_csv().encode('utf-8')
 
-        csv = convert_df(output_file)
+            csv = convert_df(output_file)
 
-        st.download_button(
-            label="Download data as CSV",
-            data=csv,
-            file_name='cleaned_records.csv',
-            mime='text/csv',
-        )
+            st.download_button(
+                label="Download data as CSV",
+                data=csv,
+                file_name='cleaned_records.csv',
+                mime='text/csv',
+            )
