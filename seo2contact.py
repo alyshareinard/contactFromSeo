@@ -1,12 +1,8 @@
-from attr import asdict
-from regex import D
 import requests
 import json
 import urllib
 import pandas as pd
-from datetime import datetime
-from datetime import timedelta
-import pickle
+
 
 def get_contacts():
     # This example displays how to get all contacts from a HubID and paginate through them using the 'offset' parameter.
