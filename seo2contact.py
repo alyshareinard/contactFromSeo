@@ -1320,8 +1320,8 @@ def process_seos(seolist):
     #print(seolist)
     with open("OUTPUT"+listname + ".csv", "w") as f:
         f.write("First Name" + ","+ "Job Title"+ ","+"BrandName"+ ","+"Company"+","+"Seoname"+","+"Email"+"\n")
-    seos = list(seolist["seoNames"])
-    #print(seos)
+    seos = seolist
+    print(seos)
     #print(len(seos), len(HScontacts))
     contactIDs = get_contacts_from_seolist(seos, HScontacts)
     #print(contactIDs)
