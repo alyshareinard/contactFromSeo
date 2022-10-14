@@ -1318,8 +1318,8 @@ def process_seos(seolist):
     #listname = "seo exports - Sober October"
     #seolist = pd.read_csv(listname + ".csv")
     #print(seolist)
-    with open("OUTPUT"+listname + ".csv", "w") as f:
-        f.write("First Name" + ","+ "Job Title"+ ","+"BrandName"+ ","+"Company"+","+"Seoname"+","+"Email"+"\n")
+
+    output_file = "First Name" + ","+ "Job Title"+ ","+"BrandName"+ ","+"Company"+","+"Seoname"+","+"Email"+"\n"
     seos = seolist
     print(seos)
     #print(len(seos), len(HScontacts))
@@ -1355,8 +1355,9 @@ def process_seos(seolist):
             contact_company = "UNK"
             
 
-        with open("OUTPUT"+listname + ".csv", "a") as f:
-            f.write(contact_fname + ","+ contact_jobtitle+ ","+contact_brandname+ ","+contact_company+","+contact_record['properties']['seoname']['value']+","+contact_email+"\n")
+
+        output_file = output_file + contact_fname + ","+ contact_jobtitle+ ","+contact_brandname+ ","+contact_company+","+contact_record['properties']['seoname']['value']+","+contact_email+"\n"
+    return(output_file)
     #output = pd.DateFrame
     #    print("\n")
     #    print(contact_fname)# + ' ' + contact_lname)
