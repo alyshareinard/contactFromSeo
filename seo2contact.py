@@ -1404,6 +1404,6 @@ if seolist is not None:
             st.download_button(
                 label="Download data as CSV",
                 data=csv,
-                file_name='cleaned_records.csv',
+                file_name='email_list.csv',
                 mime='text/csv',
             )
