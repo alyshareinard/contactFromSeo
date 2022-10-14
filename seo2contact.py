@@ -1372,7 +1372,7 @@ def process_seos(seolist):
         seo.append(contact_record['properties']['seoname']['value'])
 
 
-    output_file = pd.DataFrame(fname, jobtitle, brandname, company, seo, email)
+    output_file = pd.DataFrame([fname, jobtitle, brandname, company, seo, email])
     return(output_file)
     #output = pd.DateFrame
     #    print("\n")
