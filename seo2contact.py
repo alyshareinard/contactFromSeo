@@ -2,6 +2,8 @@ import requests
 import json
 import urllib
 import pandas as pd
+import streamlit as st
+import re
 
 
 def get_contacts():
@@ -1305,59 +1307,84 @@ def format_email(email):
 
 #rerun_badnotes()
 
+def process_seos(seolist):
+    #HScompanies = get_companies()
+    HScontacts = get_contacts()
+    #companylist = pd.read_csv("hubspot_companies.csv", names=["name", "seo", "c1", "c2", "c3", "note"])
+    #seolist = pd.read_csv("seo exports - Sober October.csv")
+    #seolist = pd.read_csv("seo exports - Autumn.csv")
+    listname = "seo exports - Halloweekender"
+    listname = "seo exports - Autumn"
+    #listname = "seo exports - Sober October"
+    #seolist = pd.read_csv(listname + ".csv")
+    #print(seolist)
+    with open("OUTPUT"+listname + ".csv", "w") as f:
+        f.write("First Name" + ","+ "Job Title"+ ","+"BrandName"+ ","+"Company"+","+"Seoname"+","+"Email"+"\n")
+    seos = list(seolist["seoNames"])
+    #print(seos)
+    #print(len(seos), len(HScontacts))
+    contactIDs = get_contacts_from_seolist(seos, HScontacts)
+    #print(contactIDs)
+    for contactID in contactIDs:
+        contact_record = get_contact_byID(str(contactID))
+
+    #            print(contact_record['properties'])
+        if 'firstname' in contact_record['properties']:
+            contact_fname = contact_record['properties']['firstname']['value']
+        else:
+            contact_fname = "UNK"
+        if 'lastname' in contact_record['properties']:  
+            contact_lname = contact_record['properties']['lastname']['value']
+        else:
+            contact_lname = "UNK"
+        if 'email' in contact_record['properties']: 
+            contact_email = contact_record['properties']['email']['value']
+        else:
+            contact_email = "UNK"
+        if 'jobtitle' in contact_record['properties']: 
+            contact_jobtitle = contact_record['properties']['jobtitle']['value'].replace(",", " ")
+        else:
+            contact_jobtitle = "UNK"
+        if 'brand_name' in contact_record['properties']: 
+            contact_brandname = contact_record['properties']['brand_name']['value']
+        else:
+            contact_brandname = "UNK"
+        if 'company' in contact_record['properties']: 
+            contact_company = contact_record['properties']['company']['value']
+        else:
+            contact_company = "UNK"
+            
+
+        with open("OUTPUT"+listname + ".csv", "a") as f:
+            f.write(contact_fname + ","+ contact_jobtitle+ ","+contact_brandname+ ","+contact_company+","+contact_record['properties']['seoname']['value']+","+contact_email+"\n")
+    #output = pd.DateFrame
+    #    print("\n")
+    #    print(contact_fname)# + ' ' + contact_lname)
+    #    print(contact_email)
+    #    print(contact_jobtitle)
 
 
-#HScompanies = get_companies()
-HScontacts = get_contacts()
-#companylist = pd.read_csv("hubspot_companies.csv", names=["name", "seo", "c1", "c2", "c3", "note"])
-#seolist = pd.read_csv("seo exports - Sober October.csv")
-#seolist = pd.read_csv("seo exports - Autumn.csv")
-listname = "seo exports - Halloweekender"
-listname = "seo exports - Autumn"
-#listname = "seo exports - Sober October"
-seolist = pd.read_csv(listname + ".csv")
-#print(seolist)
-with open("OUTPUT"+listname + ".csv", "w") as f:
-    f.write("First Name" + ","+ "Job Title"+ ","+"BrandName"+ ","+"Company"+","+"Seoname"+","+"Email"+"\n")
-seos = list(seolist["seoNames"])
-#print(seos)
-#print(len(seos), len(HScontacts))
-contactIDs = get_contacts_from_seolist(seos, HScontacts)
-#print(contactIDs)
-for contactID in contactIDs:
-    contact_record = get_contact_byID(str(contactID))
+st.title("Get contacts for SEO list")
 
-#            print(contact_record['properties'])
-    if 'firstname' in contact_record['properties']:
-        contact_fname = contact_record['properties']['firstname']['value']
-    else:
-        contact_fname = "UNK"
-    if 'lastname' in contact_record['properties']:  
-        contact_lname = contact_record['properties']['lastname']['value']
-    else:
-        contact_lname = "UNK"
-    if 'email' in contact_record['properties']: 
-        contact_email = contact_record['properties']['email']['value']
-    else:
-        contact_email = "UNK"
-    if 'jobtitle' in contact_record['properties']: 
-        contact_jobtitle = contact_record['properties']['jobtitle']['value'].replace(",", " ")
-    else:
-        contact_jobtitle = "UNK"
-    if 'brand_name' in contact_record['properties']: 
-        contact_brandname = contact_record['properties']['brand_name']['value']
-    else:
-        contact_brandname = "UNK"
-    if 'company' in contact_record['properties']: 
-        contact_company = contact_record['properties']['company']['value']
-    else:
-        contact_company = "UNK"
-        
 
-    with open("OUTPUT"+listname + ".csv", "a") as f:
-        f.write(contact_fname + ","+ contact_jobtitle+ ","+contact_brandname+ ","+contact_company+","+contact_record['properties']['seoname']['value']+","+contact_email+"\n")
-#output = pd.DateFrame
-#    print("\n")
-#    print(contact_fname)# + ' ' + contact_lname)
-#    print(contact_email)
-#    print(contact_jobtitle)
+#st.write("Upload your bad URL file here")
+seolist = st.file_uploader("Upload your SEO list")
+
+time_to_process = st.button("Ready to process")
+if time_to_process:
+    output_file = process_seos(seolist)
+
+    if len(output_file)>0:
+        @st.cache
+        def convert_df(df):
+            # IMPORTANT: Cache the conversion to prevent computation on every rerun
+            return df.to_csv().encode('utf-8')
+
+        csv = convert_df(output_file)
+
+        st.download_button(
+            label="Download data as CSV",
+            data=csv,
+            file_name='cleaned_records.csv',
+            mime='text/csv',
+        )
