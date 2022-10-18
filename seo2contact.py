@@ -700,8 +700,8 @@ def match_companies_byname(df_orig, list_new):
 
 def get_contacts_from_seolist(seolist, contactList):
     contactIDs = []
-#    print("in get contacts from seo")
-#    print(seolist)
+    print("in get contacts from seo")
+    print(seolist)
     for contact in contactList:
 
         if 'seoname' in contact['properties']:
@@ -1308,16 +1308,18 @@ def format_email(email):
 #rerun_badnotes()
 
 def process_seos(seolist):
+#    print("in process")
     #HScompanies = get_companies()
     HScontacts = get_contacts()
+#    print("got contacts")
     #companylist = pd.read_csv("hubspot_companies.csv", names=["name", "seo", "c1", "c2", "c3", "note"])
     #seolist = pd.read_csv("seo exports - Sober October.csv")
     #seolist = pd.read_csv("seo exports - Autumn.csv")
-    listname = "seo exports - Halloweekender"
-    listname = "seo exports - Autumn"
+#    listname = "seo exports - Halloweekender"
+#    listname = "seo exports - Autumn"
     #listname = "seo exports - Sober October"
     #seolist = pd.read_csv(listname + ".csv")
-    #print(seolist)
+#    print(seolist)
 
 #    output_file = "First Name" + ","+ "Job Title"+ ","+"BrandName"+ ","+"Company"+","+"Seoname"+","+"Email"+"\n"
     seos = seolist
@@ -1371,9 +1373,10 @@ def process_seos(seolist):
             company.append(contact_company)
         seo.append(contact_record['properties']['seoname']['value'])
 
-    output = {"First name":fname, "Job title":jobtitle, "Brand name":brandname, "Company":company, "SEO Name":seo, "Email":email}
+    output = {"First name":fname, "Job title":jobtitle, "Brand name":brandname, "Company":company, "seoName":seo, "Email":email}
     output_file = pd.DataFrame(output)#list(zip(fname, jobtitle, brandname, company, seo, email)))
     return(output_file)
+
     #output = pd.DateFrame
     #    print("\n")
     #    print(contact_fname)# + ' ' + contact_lname)
@@ -1387,11 +1390,27 @@ st.title("Get contacts for SEO list")
 #st.write("Upload your bad URL file here")
 seolist = st.file_uploader("Upload your SEO list")
 if seolist is not None:
-    seolist = seolist.getvalue().decode('UTF-8')
-
+    seolist = pd.read_csv(seolist)
+    if len(seolist.columns)>1:
+        try:
+            seolist = seolist['seoName']
+        except:
+            st.write("Your file must have a column with the heading 'seoName'")
+    #finally, turn it into a list of strings
+    seolist = list(seolist)
+#    seolist = seolist.getvalue().decode('UTF-8')
+#    print(seolist)
     time_to_process = st.button("Ready to process")
     if time_to_process:
+#        try:
         output_file = process_seos(seolist)
+
+        noContactsFound = list(set(seolist) - set(output_file['seoName']))
+        print(noContactsFound)
+        st.write("No contacts found for these seoNames: ", noContactsFound)
+        # except Exception as e:
+        #     st.write("Error\n", e)
+        #     output_file=[]
 
         if len(output_file)>0:
             @st.cache
