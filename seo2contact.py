@@ -1391,20 +1391,24 @@ st.title("Get contacts for SEO list")
 seolist = st.file_uploader("Upload your SEO list")
 if seolist is not None:
     seolist = pd.read_csv(seolist)
-    if len(seolist.columns)>1:
-        try:
-            seolist = seolist['seoName']
-        except:
-            st.write("Your file must have a column with the heading 'seoName'")
+
+    try:
+        seolist = seolist['seoName']
+    except:
+        st.write("Your file must have a column with the heading 'seoName'")
+
+
     #finally, turn it into a list of strings
+
     seolist = list(seolist)
+    print("now a list")
 #    seolist = seolist.getvalue().decode('UTF-8')
-#    print(seolist)
+    print(seolist)
     time_to_process = st.button("Ready to process")
     if time_to_process:
 #        try:
         output_file = process_seos(seolist)
-
+        print(output_file['seoName'])
         noContactsFound = list(set(seolist) - set(output_file['seoName']))
         print(noContactsFound)
         st.write("No contacts found for these seoNames: ", noContactsFound)
