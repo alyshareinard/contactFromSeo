@@ -815,183 +815,6 @@ def update_HSowners(bearer, newids, contacts):
 bearer_token = 'pat-eu1-afd33a4b-29ac-4efa-a4bb-41f1d3e37afe'
 
 
-
-#read_activities()
-#PD_contacts = read_people()
-#HSids = match_contacts(PD_contacts, HS_contacts)
-#if len(HSids) == len(PD_contacts): 
-#    update_HSowners(bearer_token, HSids, PD_contacts)
-#else:
-#    print("HS_ids", len(HSids))
-#    print("PD_contacts", len(PD_contacts))
-
-def read_and_upload_notes_csv():
-    PD_notes = read_notes_csv()
-    HS_contacts = get_contacts(bearer_to)
-    HSids = match_contacts_byname(PD_notes["Contact person"], HS_contacts)
-    print("Len of contact matches", len(HSids))
-    PD_notes["contactIds"] = HSids
-
-    HS_companies = get_companies(bearer_token)
-    HSids = match_companies_byname(PD_notes["Organization"], HS_companies)
-    PD_notes["companyIds"] = HSids
-
-    HS_deals = get_deals(bearer_token)
-    HSids = match_deals_byname(PD_notes["Deal title"], HS_deals)
-    PD_notes["dealIds"] = HSids
-    print(PD_notes.Content)
-
-    not_done = []
-    print("how many items there are", len(PD_notes))
-    for i in range(len(PD_notes)):
-        print("Record number", i)
-        s1970 = datetime(1970,1,1,0,0,0)
-        #hubspot API expects MILLIseconds since 1970
-        timestamp = 1000*(datetime.strptime(PD_notes["Add time"][i], '%Y-%m-%d %H:%M:%S')-s1970).total_seconds()
-        contacts = PD_notes.contactIds[i]
-        if contacts ==[""] or contacts =='':
-            contacts=[]
-        if PD_notes.companyIds[i]==[""]:
-            companies=[]
-        else:
-            print("HERE ", type(PD_notes.companyIds[i]))
-            print("HERE ", PD_notes.companyIds[i])
-            companies =[int(x) for x in PD_notes.companyIds[i]]
-
-        deals = [int(x) for x in PD_notes.dealIds[i]]
-        if deals ==[""]:
-            deals=[]
-
-
-
-        content = PD_notes.Content[i]
-
-        owner = lookup_HSowner(PD_notes.User[i])
-        notes = {"body":content, "contacts":contacts, "companies":companies, "deals":deals, "timestamp":timestamp, "owner":owner}
-        if ((len(contacts)>0 and type(contacts[0])==str) or (len(companies)>0 and type(companies[0])==str) or (len(deals)>0 and type(deals[0])==str)):
-            notes["line_in_activities"] = i
-            not_done.append(notes)
-            continue
-        upload_note(bearer_token, notes)
-
-
-    print("here are the ones that couldn't be uploaded")
-    print(not_done)
-    filehandler = open("notes-not-uploaded.obj","wb")
-    pickle.dump(not_done, filehandler)
-    filehandler.close()
-
-
-def read_and_upload_notes():
-    PD_notes = read_notes()
-    HS_contacts = get_contacts(bearer_token)
-    HSids = match_contacts_byname(PD_notes["Contact person"], HS_contacts)
-    print("Len of contact matches", len(HSids))
-    PD_notes["contactIds"] = HSids
-
-    HS_companies = get_companies(bearer_token)
-    HSids = match_companies_byname(PD_notes["Organization"], HS_companies)
-    PD_notes["companyIds"] = HSids
-
-    HS_deals = get_deals(bearer_token)
-    HSids = match_deals_byname(PD_notes["Deal title"], HS_deals)
-    PD_notes["dealIds"] = HSids
-    print(PD_notes.Content)
-
-    not_done = []
-    print("how many items tehre are", len(PD_notes))
-    for i in range(len(PD_notes)):
-        print("Record number", i)
-        s1970 = datetime(1970,1,1,0,0,0)
-        #hubspot API expects MILLIseconds since 1970
-        timestamp = 1000*(datetime.strptime(PD_notes["Add time"][i], '%Y-%m-%d %H:%M:%S')-s1970).total_seconds()
-        contacts = PD_notes.contactIds[i]
-        if contacts ==[""] or contacts =='':
-            contacts=[]
-        if PD_notes.companyIds[i]==[""]:
-            companies=[]
-        else:
-            print("HERE ", type(PD_notes.companyIds[i]))
-            print("HERE ", PD_notes.companyIds[i])
-            companies =[int(x) for x in PD_notes.companyIds[i]]
-
-        deals = [int(x) for x in PD_notes.dealIds[i]]
-        if deals ==[""]:
-            deals=[]
-
-
-
-        content = PD_notes.Content[i]
-
-        owner = lookup_HSowner(PD_notes.User[i])
-        notes = {"body":content, "contacts":contacts, "companies":companies, "deals":deals, "timestamp":timestamp, "owner":owner}
-        if ((len(contacts)>0 and type(contacts[0])==str) or (len(companies)>0 and type(companies[0])==str) or (len(deals)>0 and type(deals[0])==str)):
-            notes["line_in_activities"] = i
-            not_done.append(notes)
-            continue
-        upload_note(bearer_token, notes)
-
-
-    print("here are the ones that couldn't be uploaded")
-    print(not_done)
-    filehandler = open("notes-not-uploaded.obj","wb")
-    pickle.dump(not_done, filehandler)
-    filehandler.close()
-
-# def sync_engagments(bearer_from, bearer_to, owner_dict, do_update):
-#     origin = get_contacts(bearer_from)
-#     new = get_contacts(bearer_to)
-
-#     ids_dict = create_ids_dict(origin, new)
-
-#     copy_engagements(bearer_from, bearer_to, ids_dict, owner_dict, do_update)
-
-# def copy_engagements(bearer_from, bearer_to, ids_dict, owner_dict, doupdate):
-#     old_engage = get_engagements(bearer_from)
-
-#     for engage in old_engage:
-#         #print("engage before", engage)
-#         engage['engagement'].pop('id')
-#         engage['engagement'].pop('portalId')
-#         engage['engagement'].pop('createdAt')
-#         lastupdate = engage['engagement'].pop('lastUpdated')
-#         try:
-#             engage['engagement'].pop('createdBy')
-#         except:
-#             pass
-#         try:
-#             engage['engagement'].pop('modifiedBy')
-#         except:
-#             pass
-#         try:
-#             engage['engagement'].pop('bodyPreviewIsTruncated')
-#         except:
-#             pass
-#         engage['engagement']['companyIds'] = []
-#         engage['associations']['companyIds'] = []
-#         if engage['engagement']['active'] == True:
-#             engage['engagement']['active'] = 'true'
-#         else:
-#             engage['engagement']['active'] = 'false'
-#         engage['engagement']['ownerId'] = owner_dict[engage['engagement']['ownerId']]
-#         newids=[]
-#         for id in engage["associations"]['contactIds']:
-#             if id in ids_dict:
-#                 newids.append(ids_dict[id])
-#             else:
-#                 print("need to move over", id)
-#     #    print("newids", newids)
-#         engage['associations']['contactIds'] = newids
-#     #    print("after", engage)
-#         if lastupdate>1637715720000:
-#             file_object = open('log.txt', 'w')
-
-#             post_engagement(bearer_to, engage, file_object)
-#             file_object.close()
-#         else:
-#             print("last update is", lastupdate)
-#     return
-
 def create_ids_dict(origin, new):
     #create lookup dictionary from contact ID in old account to contact ID in new account
     ids_dict = {}
@@ -1030,64 +853,6 @@ def create_deal_dict(origin_comp, new_comp):
                 ids_dict[contact_old['vid']] = contact_new['vid']
     return(companies_dict)
 
-def read_and_upload_activities(activities):
-    if activities:
-        PD_act=activities
-    else:
-        PD_act = read_activities_csv()
-
-    HS_contacts = get_contacts(bearer_token)
-    HSids = match_contacts_byname(PD_act["Contact person"], HS_contacts)
-    print("Len of contact matches", len(HSids))
-    PD_act["contactIds"] = HSids
-
-    HS_companies = get_companies(bearer_token)
-    HSids = match_companies_byname(PD_act["Organization"], HS_companies)
-    PD_act["companyIds"] = HSids
-
-    HS_deals = get_deals(bearer_token)
-    HSids = match_deals_byname(PD_act["Deal"], HS_deals)
-    PD_act["dealIds"] = HSids
-
-
-    for i in range(len(PD_act)):
-        print("record number ", i)
-        s1970 = datetime(1970,1,1,0,0,0)
-        #hubspot API expects MILLIseconds since 1970
-        owner = lookup_HSowner(PD_act.Creator[i])
-
-        
-
-        timestamp = 1000*(datetime.strptime(PD_act["Due date"][i], '%Y-%m-%d %H:%M:%S')-s1970).total_seconds()
-        duration = PD_act["Duration"][i].split(":")
-        print("duration", duration)
-        if duration==['']:
-            duration = 0
-        else:
-            duration = 1000* (timedelta(hours = int(duration[0]), minutes = int(duration[1])).total_seconds())
-
-        contacts = PD_act.contactIds[i]
-        if contacts ==[""] or contacts =='':
-            contacts=[]
-        companies =[PD_act.companyIds[i]]
-        if companies==[""] or companies==[[]]:
-            companies=[]
-        deals = [PD_act.dealIds[i]]
-        if deals ==[""]or deals==[[]]:
-            deals=[]
-
-        endtime = timestamp + duration
-        if PD_act["Type"][i]=="Meeting":
-            activities = {"body":PD_act["Subject"][i],  "timestamp":timestamp,"startTime":timestamp, "endTime":endtime, "Subject":PD_act["Subject"][i], "owner":owner, "contacts": contacts, "companies": companies, "deals": deals, "notes":PD_act["Public description"][i]}
-            upload_meeting(bearer_token, activities)
-
-        if PD_act["Type"][i]=="Call":
-            activities = {"body":PD_act["Subject"][i],  "timestamp":timestamp, "startTime":timestamp, "endTime":endtime, "owner":owner,"contacts": contacts, "companies": companies, "deals": deals, "duration":duration, "toNumber":"", "fromNumber":""}
-            upload_call(bearer_token, activities)
-
-        if PD_act["Type"][i]=="Email":
-            activities = {"body":PD_act["Subject"][i],  "timestamp":timestamp, "startTime":timestamp, "endTime":endtime, "owner":owner,"contacts": contacts, "companies": companies, "deals": deals}
-            upload_email(bearer_token, activities)
 
 def get_summary(bearer_token):
     print("getting contacts")
@@ -1304,8 +1069,15 @@ def format_email(email):
 #copy_contact_owners(bearer_from_artesian, bearer_to, ids_dict)
 #read_and_upload_notes()
 #read_and_upload_activities()
-
+ 
 #rerun_badnotes()
+def get_contact_property(property, contact_record):
+    if property in contact_record['properties']:
+        property_value = contact_record['properties'][property]['value'].replace(",", " ")
+        return(property_value)
+    else:
+        return("UNK")
+        
 
 def process_seos(seolist):
 #    print("in process")
@@ -1324,10 +1096,12 @@ def process_seos(seolist):
 #    output_file = "First Name" + ","+ "Job Title"+ ","+"BrandName"+ ","+"Company"+","+"Seoname"+","+"Email"+"\n"
     seos = seolist
 
-    #print(len(seos), len(HScontacts))
+    print(len(seos), len(HScontacts))
     contactIDs = get_contacts_from_seolist(seos, HScontacts)
-    #print(contactIDs)
+    numcontacts = len(contactIDs)
+    st.write("Processing ", numcontacts, " contacts")
     fname = []
+    fname2 = []
     lname = []
     email=[]
     jobtitle=[]
@@ -1335,55 +1109,25 @@ def process_seos(seolist):
     brandname=[]
     company=[]
     seo=[]
+    count=1
     for contactID in contactIDs:
+        if len(fname)>count * numcontacts/10:
+            st.write(count*10, " percent done")
+            count+=1
         contact_record = get_contact_byID(str(contactID))
 
-    #            print(contact_record['properties'])
-        if 'firstname' in contact_record['properties']:
-            contact_fname = contact_record['properties']['firstname']['value']
-            fname.append(contact_fname)
-        else:
-            contact_fname = "UNK"
-            fname.append(contact_fname)
-        if 'lastname' in contact_record['properties']:  
-            contact_lname = contact_record['properties']['lastname']['value']
-        else:
-            contact_lname = "UNK"
-            lname.append(contact_lname)
-        if 'email' in contact_record['properties']: 
-            contact_email = contact_record['properties']['email']['value']
-            email.append(contact_email)
-        else:
-            contact_email = "UNK"
-            email.append(contact_email)
-        if 'jobtitle' in contact_record['properties']: 
-            contact_jobtitle = contact_record['properties']['jobtitle']['value'].replace(",", " ")
-            jobroletype.append(contact_jobtitle)
-        else:
-            contact_jobtitle = "UNK"
-            jobtitle.append(contact_jobtitle)
-        if 'job_role_type__don_t_change_' in contact_record['properties']: 
-            contact_jobroletype = contact_record['properties']['job_role_type__don_t_change_']['value']
-            jobtitle.append(contact_jobtitle)
-        else:
-            contact_jobtitle = "UNK"
-            jobtitle.append(contact_jobtitle)
+        fname.append(get_contact_property('firstname', contact_record))
+        lname.append(get_contact_property('lastname', contact_record))
+        email.append(get_contact_property('email', contact_record))
+        brandname.append(get_contact_property('brand_name', contact_record))
+        company.append(get_contact_property('company', contact_record))
+        jobroletype.append(get_contact_property('job_role_type__don_t_change_', contact_record))
+        jobtitle.append(get_contact_property('jobtitle', contact_record))
 
-        if 'brand_name' in contact_record['properties']: 
-            contact_brandname = contact_record['properties']['brand_name']['value']
-            brandname.append(contact_brandname)
-        else:
-            contact_brandname = "UNK"
-            brandname.append(contact_brandname)
-        if 'company' in contact_record['properties']: 
-            contact_company = contact_record['properties']['company']['value']
-            company.append(contact_company)
-        else:
-            contact_company = "UNK"
-            company.append(contact_company)
+
         seo.append(contact_record['properties']['seoname']['value'])
 
-    output = {"First name":fname, "Last name":lname, "Job title":jobtitle, "Job role type":contact_jobroletype, "Brand name":brandname, "Company":company, "seoName":seo, "Email":email}
+    output = {"First name":fname, "Last name":lname, "Job title":jobtitle, "Job role type":jobroletype, "Brand name":brandname, "Company":company, "seoName":seo, "Email":email}
     output_file = pd.DataFrame(output)#list(zip(fname, jobtitle, brandname, company, seo, email)))
     return(output_file)
 
