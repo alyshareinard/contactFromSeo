@@ -1328,8 +1328,10 @@ def process_seos(seolist):
     contactIDs = get_contacts_from_seolist(seos, HScontacts)
     #print(contactIDs)
     fname = []
+    lname = []
     email=[]
     jobtitle=[]
+    jobroletype=[]
     brandname=[]
     company=[]
     seo=[]
@@ -1347,6 +1349,7 @@ def process_seos(seolist):
             contact_lname = contact_record['properties']['lastname']['value']
         else:
             contact_lname = "UNK"
+            lname.append(contact_lname)
         if 'email' in contact_record['properties']: 
             contact_email = contact_record['properties']['email']['value']
             email.append(contact_email)
@@ -1355,10 +1358,17 @@ def process_seos(seolist):
             email.append(contact_email)
         if 'jobtitle' in contact_record['properties']: 
             contact_jobtitle = contact_record['properties']['jobtitle']['value'].replace(",", " ")
+            jobroletype.append(contact_jobtitle)
+        else:
+            contact_jobtitle = "UNK"
+            jobtitle.append(contact_jobtitle)
+        if 'job_role_type__don_t_change_' in contact_record['properties']: 
+            contact_jobroletype = contact_record['properties']['job_role_type__don_t_change_']['value']
             jobtitle.append(contact_jobtitle)
         else:
             contact_jobtitle = "UNK"
             jobtitle.append(contact_jobtitle)
+
         if 'brand_name' in contact_record['properties']: 
             contact_brandname = contact_record['properties']['brand_name']['value']
             brandname.append(contact_brandname)
@@ -1373,7 +1383,7 @@ def process_seos(seolist):
             company.append(contact_company)
         seo.append(contact_record['properties']['seoname']['value'])
 
-    output = {"First name":fname, "Job title":jobtitle, "Brand name":brandname, "Company":company, "seoName":seo, "Email":email}
+    output = {"First name":fname, "Last name":lname, "Job title":jobtitle, "Job role type":contact_jobroletype, "Brand name":brandname, "Company":company, "seoName":seo, "Email":email}
     output_file = pd.DataFrame(output)#list(zip(fname, jobtitle, brandname, company, seo, email)))
     return(output_file)
 
@@ -1401,7 +1411,7 @@ if seolist is not None:
     #finally, turn it into a list of strings
 
     seolist = list(seolist)
-    print("now a list")
+#    print("now a list")
 #    seolist = seolist.getvalue().decode('UTF-8')
     print(seolist)
     time_to_process = st.button("Ready to process")
